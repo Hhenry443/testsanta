@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Unlock Your Secret Santa</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #ffefba, #ffffff);
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+  <div class="bg-red-100 shadow-lg rounded-lg p-4 sm:p-6 w-full max-w-md border-4 border-green-500">
+    <h1 class="text-2xl sm:text-3xl font-bold text-center text-red-700 mb-4">🎅 Unlock Your Secret Santa 🎄</h1>
+
+    <!-- Input for the unique code -->
+    <div class="mb-6">
+      <input id="codeInput" 
+        class="w-full border border-green-400 rounded-lg p-3 text-sm sm:text-base text-gray-700 bg-green-50 focus:outline-none focus:ring-2 focus:ring-red-500"
+        placeholder="Enter your unique code" />
+      <button id="checkCodeButton" 
+        class="w-full mt-4 bg-blue-600 text-white py-2 px-4 text-sm sm:text-base rounded-lg hover:bg-blue-700 transition-colors shadow-md">
+        🎁 Reveal My Secret Santa 🎁
+      </button>
+    </div>
+
+    <!-- Result Display for the Secret Santa -->
+    <div id="resultContainer" class="hidden text-center">
+      <h2 class="text-lg sm:text-xl font-semibold text-green-700 mb-4">🎄 Your Secret Santa 🎄</h2>
+      <p id="resultMessage" class="mt-4 text-base sm:text-lg text-red-600 font-semibold"></p>
+    </div>
+  </div>
+
+  <script>
+    // Secret key for encryption/decryption
+    const secretKey = 'mySecretKey123'; 
+
+    // XOR Encryption function (same as used in the generator)
+    function xorEncryptDecrypt(input, key) {
+      let result = '';
+      for (let i = 0; i < input.length; i++) {
+        result += String.fromCharCode(input.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+      }
+      return result;
+    }
+
+    // Handle the unlock action when the user inputs their code
+    document.getElementById('checkCodeButton').addEventListener('click', () => {
+      const code = document.getElementById('codeInput').value.trim();
+
+      // Fetch the encrypted pairing using the code from localStorage
+      const encryptedPairing = localStorage.getItem(code);
+
+      if (encryptedPairing) {
+        // Decrypt the pairing and display it
+        const pairing = xorEncryptDecrypt(encryptedPairing, secretKey);
+        document.getElementById('resultContainer').classList.remove('hidden');
+        document.getElementById('resultMessage').textContent = `Your Secret Santa is: ${pairing}! 🎁`;
+      } else {
+        alert('Invalid code. Please try again.');
+      }
+    });
+  </script>
+</body>
+</html>

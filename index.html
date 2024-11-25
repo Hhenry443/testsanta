@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Secret Santa Generator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(135deg, #ffefba, #ffffff);
+    }
+  </style>
+</head>
+<body class="flex items-center justify-center min-h-screen">
+  <div class="bg-red-100 shadow-lg rounded-lg p-6 w-full max-w-md border-4 border-green-500">
+    <h1 class="text-2xl sm:text-3xl font-bold text-center text-red-700 mb-4">🎅 Secret Santa Generator 🎄</h1>
+    <div class="mb-6">
+      <label for="names" class="text-lg font-semibold text-red-600">Enter names (comma separated):</label>
+      <input id="names" type="text" placeholder="e.g. Alice, Bob, Charlie" 
+        class="w-full border border-green-400 rounded-lg p-3 text-sm sm:text-base text-gray-700 bg-green-50 focus:outline-none focus:ring-2 focus:ring-red-500" />
+    </div>
+    <button id="generateButton" 
+      class="w-full bg-blue-600 text-white py-2 px-4 text-sm sm:text-base rounded-lg hover:bg-blue-700 transition-colors shadow-md">
+      Generate Codes
+    </button>
+    <div id="codesContainer" class="mt-6 hidden">
+      <h2 class="text-xl sm:text-2xl font-semibold text-green-700 mb-4">🎁 Generated Codes 🎁</h2>
+      <ul id="codesList" class="space-y-2 text-lg text-gray-800"></ul>
+    </div>
+  </div>
+
+  <script>
+    // Secret key for encryption/decryption
+    const secretKey = 'mySecretKey123'; 
+
+    // XOR Encryption function
+    function xorEncryptDecrypt(input, key) {
+      let result = '';
+      for (let i = 0; i < input.length; i++) {
+        result += String.fromCharCode(input.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+      }
+      return result;
+    }
+
+    // Function to generate random pairings
+    function generatePairings(names) {
+      const shuffledNames = names.sort(() => Math.random() - 0.5);
+      const pairings = {};
+
+      names.forEach((name, index) => {
+        const pairedWith = shuffledNames[(index + 1) % names.length];
+        pairings[name] = pairedWith;
+      });
+
+      return pairings;
+    }
+
+    // Handle the generate button click
+    document.getElementById('generateButton').addEventListener('click', () => {
+      const namesInput = document.getElementById('names').value.trim();
+      if (!namesInput) {
+        alert('Please enter names');
+        return;
+      }
+
+      const names = namesInput.split(',').map(name => name.trim());
+      const pairings = generatePairings(names);
+      const codesList = document.getElementById('codesList');
+      const codesContainer = document.getElementById('codesContainer');
+
+      codesList.innerHTML = '';
+      Object.keys(pairings).forEach((name) => {
+        const uniqueCode = Math.random().toString(36).substring(2, 8); // Generate unique code
+        const encryptedPairing = xorEncryptDecrypt(pairings[name], secretKey); // Encrypt pairing
+
+        // Store the encrypted pairing in localStorage with the unique code
+        localStorage.setItem(uniqueCode, encryptedPairing);
+
+        codesList.innerHTML += `
+          <li><strong>${name}</strong> - Unique code: <strong>${uniqueCode}</strong></li>
+        `;
+      });
+
+      codesContainer.classList.remove('hidden');
+    });
+  </script>
+</body>
+</html>
